@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ระบบรายงานเงินสำรองจ่ายครอบครัว</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #0f172a;
+      --primary-light: #3b82f6;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --font-family: 'Prompt', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding-bottom: calc(40px + env(safe-area-inset-bottom));
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      color: white;
+      padding: calc(16px + env(safe-area-inset-top)) 16px 20px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.25);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .badge-status i {
+      color: #34d399;
+      font-size: 11px;
+    }
+
+    .admin-switch-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .main-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .sub-title {
+      font-size: 14px;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .total-hero-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      margin: -10px 16px 16px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      border: 1px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .total-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .total-amount-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .total-amount {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+
+    .total-unit {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .status-text-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #059669;
+      font-weight: 600;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .container {
+      padding: 0 16px;
+    }
+
+    .admin-action-bar {
+      display: none;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-action-bar.active {
+      display: flex;
+    }
+
+    .btn-add-payment {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-exit-admin {
+      background: #e2e8f0;
+      color: var(--text-main);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .view-tabs {
+      display: flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .person-card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .person-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .person-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .person-total {
+      font-size: 18px;
+      font-weight: 700;
+      color: #b45309;
+    }
+
+    .installments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .inst-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      position: relative;
+    }
+
+    .inst-num {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .inst-amount {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 2px 0;
+    }
+
+    .inst-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .compact-table-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    .table-header-bar {
+      background: var(--primary-dark);
+      color: white;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      min-width: 800px;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 6px 4px;
+      font-size: 11px;
+    }
+
+    th {
+      background: #1e3a8a;
+      color: white;
+      font-weight: 600;
+    }
+
+    th.th-total {
+      background: #d97706;
+    }
+
+    td.cell-name {
+      text-align: left;
+      font-weight: 700;
+      padding-left: 8px;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    td.cell-total {
+      font-weight: 700;
+      color: #b45309;
+      background: #fef3c7;
+    }
+
+    .t-amt {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .t-date {
+      font-size: 9px;
+      color: #64748b;
+    }
+
+    .t-empty {
+      color: #cbd5e1;
+    }
+
+    .row-footer {
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .select-pill {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .select-pill.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .inst-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-quick-amt {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .btn-save {
+      flex: 2;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-delete {
+      flex: 1;
+      background: #fee2e2;
+      color: var(--danger);
+      border: 1px solid #fca5a5;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: #f1f5f9;
+      color: var(--text-main);
+      border: 1px solid #cbd5e1;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="badge-status">
+        <i class="fa-solid fa-circle"></i>
+        <span>รายงานเงินสำรอง</span>
+      </div>
+      <button class="admin-switch-btn" id="btnToggleAdmin" onclick="toggleAdminMode()">
+        <i class="fa-solid fa-lock" id="adminIcon"></i>
+        <span id="adminText">ระบบบันทึก</span>
+      </button>
+    </div>
+    <h1 class="main-title">รายชื่อให้สำรองเงินค่าดูแลน้าหวาด</h1>
+    <p class="sub-title">ค่าใช้จ่ายบ้านน้าหนี</p>
+  </header>
+
+  <div class="total-hero-card">
+    <div class="total-label">
+      <i class="fa-solid fa-wallet"></i> ยอดสำรองรวมทั้งหมด
+    </div>
+    <div class="total-amount-row">
+      <div class="total-amount" id="totalAmountText">0</div>
+      <div class="total-unit">บาท</div>
+    </div>
+    <div class="status-text-row">
+      <i class="fa-solid fa-rotate"></i>
+      <span id="recordCountText">อัปเดตข้อมูลอัตโนมัติ รวมทั้งหมด 10 รายการ</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="admin-action-bar" id="adminActionBar">
+      <button class="btn-add-payment" onclick="openPaymentModal()">
+        <i class="fa-solid fa-plus-circle"></i> ลงรายการใหม่
+      </button>
+      <button class="btn-exit-admin" onclick="exitAdmin()">
+        ออกจากโหมดบันทึก
+      </button>
+    </div>
+
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tabCards" onclick="switchTab('cards')">
+        <i class="fa-solid fa-address-card"></i> การ์ดรายชื่อ
+      </button>
+      <button class="tab-btn" id="tabTable" onclick="switchTab('table')">
+        <i class="fa-solid fa-table"></i> ตารางสรุปเต็ม
+      </button>
+    </div>
+
+    <!-- หน้าแบบการ์ด -->
+    <div id="cardsViewContainer"></div>
+
+    <!-- หน้าแบบตาราง -->
+    <div id="tableViewContainer" style="display: none;">
+      <div class="compact-table-card">
+        <div class="table-header-bar">
+          <span><i class="fa-solid fa-camera"></i> ตารางรวม 12 งวด</span>
+          <span>หน่วย: บาท</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>รายชื่อ</th>
+              <th>งวด 1</th><th>งวด 2</th><th>งวด 3</th><th>งวด 4</th>
+              <th>งวด 5</th><th>งวด 6</th><th>งวด 7</th><th>งวด 8</th>
+              <th>งวด 9</th><th>งวด 10</th><th>งวด 11</th><th>งวด 12</th>
+              <th class="th-total">รวม</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+          <tfoot>
+            <tr class="row-footer" id="tableFooter"></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- หน้าต่างกรอกข้อมูล -->
+  <div class="modal-overlay" id="modalPayment">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span id="modalHeaderTitle">ลงบันทึกเงินสำรอง</span>
+        <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="closeModal()"></i>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">1. เลือกรายชื่อ</label>
+        <div class="selection-grid" id="nameSelectorGrid"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">2. เลือกงวดที่ (1 - 12)</label>
+        <div class="inst-selector-grid" id="instSelectorGrid"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">3. วันที่บันทึก (ว-ด-ป)</label>
+        <input type="text" class="form-input" id="inputDate" placeholder="เช่น 2-11-68">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">4. จำนวนเงิน (บาท)</label>
+        <input type="number" class="form-input" id="inputAmount" placeholder="ระบุจำนวนเงิน">
+        <div class="quick-amounts">
+          <button class="btn-quick-amt" onclick="setQuickAmount(5000)">5,000</button>
+          <button class="btn-quick-amt" onclick="setQuickAmount(10000)">10,000</button>
+          <button class="btn-quick-amt" onclick="setQuickAmount(20000)">20,000</button>
+          <button class="btn-quick-amt" onclick="setQuickAmount(37000)">37,000</button>
+        </div>
+      </div>
+
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal()">ปิด</button>
+        <button class="btn-delete" id="btnDeleteInst" onclick="deleteInstallment()" style="display:none;">ลบงวดนี้</button>
+        <button class="btn-save" id="btnSaveSubmit" onclick="savePayment()">
+          <span id="btnSaveText">บันทึกข้อมูล</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyP6b3OOPVUheexwtds2xs589pGImN26Tazqbk1x2dpf5sMNgKeYEEFk7iGTw7MU3oJ/exec";
+    const ADMIN_PASS = "1158";
+    const TOTAL_INSTALLMENTS = 12;
+
+    let appData = [
+      { name: "ตุ๊กตา", installments: { 1: { d: "2-11-68", a: 20000 }, 2: { d: "11-5-69", a: 20000 } } },
+      { name: "การุณ", installments: { 1: { d: "2-11-68", a: 20000 }, 2: { d: "11-5-69", a: 37000 } } },
+      { name: "อรุณศรี (น้าจิ๊ด)", installments: { 1: { d: "6-12-68", a: 20000 } } },
+      { name: "สมพร (ครอบครัวไข่)", installments: { 1: { d: "22-12-68", a: 20000 }, 2: { d: "20-7-69", a: 20000 } } },
+      { name: "วิไลรัตน์ (น้ารัตน์)", installments: { 1: { d: "26-12-68", a: 20000 } } },
+      { name: "สายพิณ (แหม่ม)", installments: { 1: { d: "10-2-69", a: 20000 }, 2: { d: "20-8-69", a: 20000 } } },
+      { name: "ประพนธ์ (ตุ้ม) [1]", installments: { 1: { d: "2-3-69", a: 5000 }, 2: { d: "3-6-69", a: 5000 }, 3: { d: "3-9-69", a: 5000 } } },
+      { name: "ประพนธ์ (ตุ้ม) [2]", installments: { 1: { d: "3-4-69", a: 5000 }, 2: { d: "3-7-69", a: 5000 }, 3: { d: "3-10-69", a: 5000 } } },
+      { name: "ประพนธ์ (ตุ้ม) [3]", installments: { 1: { d: "4-5-69", a: 5000 }, 2: { d: "3-8-69", a: 5000 } } },
+      { name: "นภาพร", installments: { 1: { d: "12-3-69", a: 20000 }, 2: { d: "10-9-69", a: 20000 } } }
+    ];
+
+    let isAdmin = false;
+    let selectedName = appData[0].name;
+    let selectedInst = 1;
+
+    async function loadDataFromCloud() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const json = await res.json();
+        if (json.status === 'success' && json.data && json.data.length > 1) {
+          const rows = json.data;
+          const freshData = [];
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const name = row[0];
+            if (!name) continue;
+            const insts = {};
+            for (let inst = 1; inst <= TOTAL_INSTALLMENTS; inst++) {
+              const dIndex = inst * 2 - 1;
+              const aIndex = inst * 2;
+              const dateVal = row[dIndex];
+              const amtVal = parseFloat(row[aIndex]);
+              if (amtVal > 0) {
+                insts[inst] = { d: dateVal ? String(dateVal) : "", a: amtVal };
+              }
+            }
+            freshData.push({ name: name, installments: insts });
+          }
+          if (freshData.length > 0) {
+            appData = freshData;
+            renderAll();
+          }
+        }
+      } catch (e) {
+        console.log("Local mode active");
+      }
+    }
+
+    function renderAll() {
+      renderCards();
+      renderTable();
+      updateTotals();
+    }
+
+    function updateTotals() {
+      let grandTotal = 0;
+      appData.forEach(person => {
+        for (let i = 1; i <= TOTAL_INSTALLMENTS; i++) {
+          if (person.installments[i]) {
+            grandTotal += Number(person.installments[i].a || 0);
+          }
+        }
+      });
+      document.getElementById('totalAmountText').innerText = grandTotal.toLocaleString();
+      document.getElementById('recordCountText').innerText = `อัปเดตข้อมูลอัตโนมัติ รวมทั้งหมด ${appData.length} รายการ`;
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardsViewContainer');
+      container.innerHTML = '';
+
+      appData.forEach(person => {
+        let pTotal = 0;
+        let instListHtml = '';
+
+        for (let i = 1; i <= TOTAL_INSTALLMENTS; i++) {
+          const inst = person.installments[i];
+          if (inst && inst.a > 0) {
+            pTotal += Number(inst.a);
+            instListHtml += `
+              <div class="inst-item" ${isAdmin ? `onclick="openEditDirect('${person.name}',${i})" style="cursor:pointer;"` : ''}>
+                <div class="inst-num">
+                  <span>งวดที่ ${i}</span>
+                  ${isAdmin ? '<i class="fa-solid fa-pen" style="font-size:10px;color:#3b82f6;"></i>' : ''}
+                </div>
+                <div class="inst-amount">${Number(inst.a).toLocaleString()} ฿</div>
+                <div class="inst-date">${inst.d || '-'}</div>
+              </div>
+            `;
+          }
+        }
+
+        if (instListHtml === '') {
+          instListHtml = '<div style="grid-column:1/-1;font-size:13px;color:#94a3b8;padding:8px 0;">ยังไม่มีรายการบันทึก</div>';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'person-card';
+        card.innerHTML = `
+          <div class="person-header">
+            <div class="person-name">
+              <i class="fa-solid fa-user-check" style="color:#3b82f6;margin-right:6px;"></i>${person.name}
+            </div>
+            <div class="person-total">${pTotal.toLocaleString()} ฿</div>
+          </div>
+          <div class="installments-grid">${instListHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const tfoot = document.getElementById('tableFooter');
+      tbody.innerHTML = '';
+
+      const instTotals = Array(TOTAL_INSTALLMENTS + 1).fill(0);
+      let allTotal = 0;
+
+      appData.forEach(person => {
+        const tr = document.createElement('tr');
+        let rowSum = 0;
+        let colsHtml = `<td class="cell-name">${person.name}</td>`;
+
+        for (let i = 1; i <= TOTAL_INSTALLMENTS; i++) {
+          const item = person.installments[i];
+          if (item && item.a > 0) {
+            const amt = Number(item.a);
+            rowSum += amt;
+            instTotals[i] += amt;
+            colsHtml += `
+              <td ${isAdmin ? `onclick="openEditDirect('${person.name}',${i})" style="cursor:pointer;background:#eff6ff;"` : ''}>
+                <div class="t-amt">${amt.toLocaleString()}</div>
+                <div class="t-date">${item.d || ''}</div>
+              </td>
+            `;
+          } else {
+            colsHtml += `
+              <td class="t-empty" ${isAdmin ? `onclick="openEditDirect('${person.name}',${i})" style="cursor:pointer;"` : ''}>-</td>
+            `;
+          }
+        }
+
+        allTotal += rowSum;
+        colsHtml += `<td class="cell-total">${rowSum.toLocaleString()}</td>`;
+        tr.innerHTML = colsHtml;
+        tbody.appendChild(tr);
+      });
+
+      let footHtml = `<td class="cell-name">ยอดรวม</td>`;
+      for (let i = 1; i <= TOTAL_INSTALLMENTS; i++) {
+        footHtml += `<td><strong>${instTotals[i] > 0 ? instTotals[i].toLocaleString() : '0'}</strong></td>`;
+      }
+      footHtml += `<td class="cell-total" style="font-size:13px;">${allTotal.toLocaleString()}</td>`;
+      tfoot.innerHTML = footHtml;
+    }
+
+    function toggleAdminMode() {
+      if (isAdmin) {
+        exitAdmin();
+        return;
+      }
+      const pass = prompt("กรุณาระบุรหัสผ่านระบบบันทึก:");
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        document.getElementById('adminIcon').className = 'fa-solid fa-unlock';
+        document.getElementById('adminText').innerText = 'โหมดบันทึกเปิดอยู่';
+        document.getElementById('adminActionBar').classList.add('active');
+        renderAll();
+      } else if (pass !== null) {
+        alert("รหัสผ่านไม่ถูกต้อง");
+      }
+    }
+
+    function exitAdmin() {
+      isAdmin = false;
+      document.getElementById('adminIcon').className = 'fa-solid fa-lock';
+      document.getElementById('adminText').innerText = 'ระบบบันทึก';
+      document.getElementById('adminActionBar').classList.remove('active');
+      renderAll();
+    }
+
+    function switchTab(type) {
+      if (type === 'cards') {
+        document.getElementById('cardsViewContainer').style.display = 'block';
+        document.getElementById('tableViewContainer').style.display = 'none';
+        document.getElementById('tabCards').classList.add('active');
+        document.getElementById('tabTable').classList.remove('active');
+      } else {
+        document.getElementById('cardsViewContainer').style.display = 'none';
+        document.getElementById('tableViewContainer').style.display = 'block';
+        document.getElementById('tabCards').classList.remove('active');
+        document.getElementById('tabTable').classList.add('active');
+      }
+    }
+
+    function initModalSelectors() {
+      const nameGrid = document.getElementById('nameSelectorGrid');
+      nameGrid.innerHTML = '';
+      appData.forEach(p => {
+        const pill = document.createElement('div');
+        pill.className = `select-pill ${p.name === selectedName ? 'active' : ''}`;
+        pill.innerText = p.name;
+        pill.onclick = () => {
+          document.querySelectorAll('#nameSelectorGrid .select-pill').forEach(el => el.classList.remove('active'));
+          pill.classList.add('active');
+          selectedName = p.name;
+          fillExistingData();
+        };
+        nameGrid.appendChild(pill);
+      });
+
+      const instGrid = document.getElementById('instSelectorGrid');
+      instGrid.innerHTML = '';
+      for (let i = 1; i <= TOTAL_INSTALLMENTS; i++) {
+        const pill = document.createElement('div');
+        pill.className = `select-pill ${i === selectedInst ? 'active' : ''}`;
+        pill.innerText = `งวด ${i}`;
+        pill.onclick = () => {
+          document.querySelectorAll('#instSelectorGrid .select-pill').forEach(el => el.classList.remove('active'));
+          pill.classList.add('active');
+          selectedInst = i;
+          fillExistingData();
+        };
+        instGrid.appendChild(pill);
+      }
+    }
+
+    function openPaymentModal() {
+      initModalSelectors();
+      fillExistingData();
+      document.getElementById('modalPayment').classList.add('active');
+    }
+
+    function openEditDirect(name, instNumber) {
+      selectedName = name;
+      selectedInst = instNumber;
+      openPaymentModal();
+    }
+
+    function fillExistingData() {
+      const person = appData.find(p => p.name === selectedName);
+      const btnDel = document.getElementById('btnDeleteInst');
+      if (person && person.installments[selectedInst]) {
+        document.getElementById('inputDate').value = person.installments[selectedInst].d || '';
+        document.getElementById('inputAmount').value = person.installments[selectedInst].a || '';
+        btnDel.style.display = 'block';
+      } else {
+        document.getElementById('inputDate').value = '';
+        document.getElementById('inputAmount').value = '';
+        btnDel.style.display = 'none';
+      }
+    }
+
+    function setQuickAmount(amt) {
+      document.getElementById('inputAmount').value = amt;
+    }
+
+    function closeModal() {
+      document.getElementById('modalPayment').classList.remove('active');
+    }
+
+    async function savePayment() {
+      const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
+      const date = document.getElementById('inputDate').value.trim();
+
+      const person = appData.find(p => p.name === selectedName);
+      if (!person) return;
+
+      if (amount <= 0) {
+        delete person.installments[selectedInst];
+      } else {
+        person.installments[selectedInst] = { d: date, a: amount };
+      }
+
+      renderAll();
+      closeModal();
+
+      try {
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: selectedName,
+            installment: selectedInst,
+            date: date,
+            amount: amount
+          })
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function deleteInstallment() {
+      document.getElementById('inputAmount').value = 0;
+      savePayment();
+    }
+
+    // เริ่มต้นทำงาน
+    renderAll();
+    loadDataFromCloud();
+  </script>
+</body>
+</html>
